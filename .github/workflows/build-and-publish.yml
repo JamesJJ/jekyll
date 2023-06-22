@@ -1,0 +1,96 @@
+name: Create and publish docker image
+
+on:
+  schedule:
+    - cron: '50 4 21-27 * 6'
+  push:
+    branches: ['main']
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,priority=1000,value=v1.{{date 'YYYY.MMDD' tz='Asia/Taipei'}}
+            type=ref,priority=850,event=branch
+
+      #- name: Build and push Docker image
+      #  uses: docker/build-push-action@v4
+      #  with:
+      #    context: .
+      #    push: true
+      #    tags: ${{ steps.meta.outputs.tags }}
+      #    labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Remove conflicting release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euxo pipefail \
+          && gh release list \
+              --repo="$REPO" \
+          | awk -F$'\t' ' { print $3 } ' \
+          | grep -F -x -c "$DOCKER_METADATA_OUTPUT_VERSION" \
+          && gh release delete --repo="$REPO" --cleanup-tag -y "$DOCKER_METADATA_OUTPUT_VERSION" \
+          || true
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh release create "$DOCKER_METADATA_OUTPUT_VERSION" \
+              --latest \
+              --repo="$REPO" \
+              --title="$DOCKER_METADATA_OUTPUT_VERSION" \
+              --notes="$DOCKER_METADATA_OUTPUT_TAGS"
+
+      - name: Tidy releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euxo pipefail \
+          && gh release list \
+              --repo="$REPO" \
+          | grep -vi latest \
+          | sort -t$'\t' -k4 \
+          | awk -F$'\t' ' { print $3 } ' \
+          | tail -n +4 \
+          | sort -u \
+          | xargs -t -r -n 1 gh release delete --repo="$REPO" --cleanup-tag -y \
+          || true
+
+      - name: Delete Old Versions
+        uses: actions/delete-package-versions@v4
+        with:
+          package-name: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.title'] }}
+          package-type: 'container'
+          min-versions-to-keep: 5
+          ignore-versions: "main"
+

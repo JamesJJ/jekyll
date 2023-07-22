@@ -38,13 +38,13 @@ jobs:
             type=raw,priority=1000,value=v1.{{date 'YYYY.MMDD' tz='Asia/Taipei'}}
             type=ref,priority=850,event=branch
 
-      #- name: Build and push Docker image
-      #  uses: docker/build-push-action@v4
-      #  with:
-      #    context: .
-      #    push: true
-      #    tags: ${{ steps.meta.outputs.tags }}
-      #    labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       - name: Remove conflicting release
         env:

@@ -1,4 +1,4 @@
-FROM alpine:3.18 AS ruby_base
+FROM alpine:3.19 AS ruby_base
 
 RUN addgroup -Sg 1000 jekyll
 

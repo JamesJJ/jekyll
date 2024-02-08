@@ -6,7 +6,7 @@ gem "rouge"
 gem "sass-embedded"
 gem "public_suffix"
 gem "google-protobuf"
-gem "jekyll", "~> 4.3.0"
+gem "jekyll", "~> 4.3.3"
 gem "jekyll-paginate", "~> 1.1.0"
 gem "jekyll-sass-converter", "~> 3.0"
 

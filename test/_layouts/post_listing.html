@@ -1,0 +1,41 @@
+---
+layout: default
+---
+
+{% for post in paginator.posts %}
+<section class="post">
+  <header class="post-header">
+    <p class="post-meta">
+      <span class="post-date">
+        {{ post.date | date: "%-d %b %Y" | upcase }}
+      </span>
+      {% if post.categories.size > 0 %}
+      •
+      {% for cat in post.categories %}
+        <span class="post-cat">{{ cat }}</span>
+        {% unless forloop.last %}
+        <span>/</span>
+        {% endunless %}
+      {% endfor %}
+      {% endif %}
+    </p>
+    </header>
+
+    {% include image_feature.html %}
+
+    {% if post.excerpt %}
+    <div class="post-description">
+      <p>
+        {{ post.excerpt }}
+        {% if post.content contains site.excerpt_separator %}
+        <a href="{{ post.url }}" class="read-more" title="{{ post.title | xml_escape }}">... read more</a>
+        {% endif %}
+      </p>
+    </div>
+    {% endif %}
+
+
+</section>
+{% endfor %}
+
+

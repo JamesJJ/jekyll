@@ -1,4 +1,4 @@
-FROM alpine:3.19 AS ruby_base
+FROM alpine:3.21 AS ruby_base
 
 RUN addgroup -Sg 1000 jekyll
 
@@ -17,6 +17,7 @@ WORKDIR /opt/src
 RUN apk --no-cache add \
 ruby \
 ruby-bundler \
+gcompat \
 icu-data-full \
 libffi \
 libressl \
@@ -56,14 +57,30 @@ FROM build_base AS build_gems
 
 USER jekyll:jekyll
 
+#BUILDING
 COPY Gemfile .
 
-RUN echo "gem: --no-ri --no-rdoc" > ~/.gemrc
+RUN echo "gem: --platform ruby --no-ri --no-rdoc" > ~/.gemrc
+
+RUN bundle config set --local force_ruby_platform true
 
 RUN unset BUNDLE_PATH && unset BUNDLE_BIN && bundle install --no-cache
 
-FROM ruby_base AS final_image
+# VERIFYING
+RUN mkdir -p /opt/test /opt/_test_site && chown jekyll /opt/test /opt/_test_site
+
+COPY --chown=jekyll:jekyll test /opt/test
+
+RUN bundle exec jekyll build -s /opt/test -d /opt/_test_site --disable-disk-cache --strict_front_matter --trace
+
+RUN rm -rf /opt/test /opt/_test_site
+
+# FINAL
+FROM ruby_base AS final
 
 COPY --from=build_gems --chown=jekyll:jekyll /opt /opt
 
 USER jekyll:jekyll
+
+# DONE
+######

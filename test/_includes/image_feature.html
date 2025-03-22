@@ -1,0 +1,11 @@
+{% if post.image.feature %}
+  {% assign _this = post %}
+{% elsif page.image.feature %}
+  {% assign _this = page %}
+{% else %}
+  {% assign _this = nil %}
+{% endif %}
+
+{% if _this %}
+  <img class="feature-image frame" src="{{ _this.image.feature }}"
+{% endif %}

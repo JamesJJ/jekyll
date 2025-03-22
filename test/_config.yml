@@ -1,0 +1,76 @@
+
+defaults:
+  -
+    scope:
+      path: "" # an empty string here means all files in the project
+      type: "posts" # previously `post` in Jekyll 2.2.
+    values:
+      is_post: true
+
+###################################
+# Site wide configuration
+####################################
+#
+title:       "TITLE"
+description: "DESC"
+url: "https://www.example.com"        # the base hostname & protocol for your site
+paginate: 2
+paginate_path: "/earlier/:num/"
+exclude: ['README.md', 'LICENSE.md', 'LICENSE.txt']
+
+#
+###################################
+# Jekyll configuration
+####################################
+#
+timezone:          Etc/Utc
+markdown:          kramdown
+highlighter:       rouge
+excerpt_separator: <!--more-->
+permalink:         /:year/:month/:title/
+plugins: [jekyll-paginate]
+
+kramdown:
+  auto_ids:       true
+  footnote_nr:    1
+  entity_output:  as_char
+  toc_levels:     1..6
+  enable_coderay: false
+
+#
+###################################
+# Site Owner configuration
+####################################
+#
+owner:
+  name: OWNER
+  avatar: picture.jpg
+  job: "JOB"
+  bio: "BIO"
+  email: example@localhost.localhost
+  disqus-shortname:
+  twitter:
+  facebook:
+  google:
+    plus:
+    analytics:
+    verify:
+    ad-client:
+    ad-slot:
+  bing-verify:
+  github: #username
+  stackoverflow: #123456/username   from a "http://stackoverflow.com/users/123456/username" link
+  linkedin: #username
+  xing: #username
+  instagram: #username
+  lastfm: #username
+  tumblr: #username
+  pinterest: #username
+  foursquare: #username
+  steam: #username
+  dribbble: #username
+  youtube: #username
+  soundcloud: #username
+  weibo: #username
+  flickr: #username
+  codepen: #username
